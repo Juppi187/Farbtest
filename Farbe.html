@@ -17,6 +17,7 @@
             --glass-border: rgba(255, 255, 255, 0.3);
             --text-primary: #1a1a1a;
             --text-secondary: #8e8e93;
+            --accent-color: #5856d6;
             --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.08);
             --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.12);
             --shadow-hard: 0 12px 32px rgba(0, 0, 0, 0.15);
@@ -26,8 +27,9 @@
             --primary-color: #5856d6;
             --glass-bg: rgba(30, 30, 35, 0.7);
             --glass-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #ffffff;
-            --text-secondary: #98989d;
+            --text-primary: #f5f5f7;
+            --text-secondary: #d1d1d6;
+            --accent-color: #af52de;
             --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.3);
             --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.4);
             --shadow-hard: 0 12px 32px rgba(0, 0, 0, 0.5);
@@ -115,16 +117,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             perspective: 2000px;
         }
 
         .logo-grid {
             display: grid;
-            grid-template-columns: repeat(3, 70px);
-            grid-template-rows: repeat(3, 70px);
-            gap: 12px;
-            padding: 25px;
+            grid-template-columns: repeat(3, 45px);
+            grid-template-rows: repeat(3, 45px);
+            gap: 8px;
+            padding: 15px;
             transform-style: preserve-3d;
             animation: logoHover 6s ease-in-out infinite;
         }
@@ -137,9 +139,9 @@
         }
 
         .logo-block {
-            width: 70px;
-            height: 70px;
-            border-radius: 18px;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
             position: relative;
             transform-style: preserve-3d;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -245,9 +247,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 32px;
+            font-size: 22px;
             animation: starRotate 6s linear infinite;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
         }
 
         @keyframes starRotate {
@@ -360,7 +362,7 @@
         .stat-value {
             font-size: 36px;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--accent-color);
         }
 
 
@@ -498,6 +500,23 @@
             font-size: 32px;
             animation: starSpin 2s linear infinite;
             filter: drop-shadow(0 0 10px rgba(255, 215, 0, 1));
+        }
+
+        .game-cell.hint-fade {
+            animation: hintFadeOut 0.8s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes hintFadeOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.15;
+                transform: scale(0.9);
+                filter: grayscale(100%) blur(2px);
+            }
         }
 
         @keyframes correctBounce {
@@ -686,14 +705,15 @@
             }
 
             .logo-grid {
-                grid-template-columns: repeat(3, 55px);
-                grid-template-rows: repeat(3, 55px);
-                gap: 10px;
+                grid-template-columns: repeat(3, 40px);
+                grid-template-rows: repeat(3, 40px);
+                gap: 6px;
+                padding: 12px;
             }
 
             .logo-block {
-                width: 55px;
-                height: 55px;
+                width: 40px;
+                height: 40px;
             }
 
             .game-grid.grid-3x3 {
@@ -806,7 +826,7 @@
             <div class="controls">
                 <button class="btn" onclick="startNewGame()">🎮 Neues Spiel</button>
                 <button class="btn" onclick="nextLevel()" id="nextBtn" style="display: none;">➡️ Nächstes Level</button>
-                <button class="btn" onclick="showHint()" id="hintBtn">💡 Hinweis (-10)</button>
+                <button class="btn" onclick="showHint()" id="hintBtn">💡 Hinweis (<span id="hintCost">10</span>)</button>
             </div>
         </div>
     </div>
@@ -999,7 +1019,7 @@
             
             grid.className = `game-grid grid-${gridSize}x${gridSize}`;
             
-            const colorStrategy = Math.floor(Math.random() * 5);
+            const colorStrategy = Math.floor(Math.random() * 8);
             let baseColor, oddColor;
             
             const levelModifier = Math.max(0.5, 1 - (gameState.level * 0.05));
@@ -1065,6 +1085,36 @@
                     const randomChannel = ['r', 'g', 'b'][Math.floor(Math.random() * 3)];
                     const randomVar = Math.random() > 0.5 ? colorDiff : -colorDiff;
                     oddColor[randomChannel] = Math.max(0, Math.min(255, oddColor[randomChannel] + randomVar));
+                    break;
+                    
+                case 5:
+                    const warmHue = 10 + Math.random() * 50;
+                    const warmSat = 60 + Math.random() * 30;
+                    const warmLight = 40 + Math.random() * 25;
+                    baseColor = hslToRgb(warmHue, warmSat, warmLight);
+                    
+                    const warmShift = (colorDiff / 255) * 20;
+                    oddColor = hslToRgb(warmHue, warmSat + warmShift, warmLight);
+                    break;
+                    
+                case 6:
+                    const coolHue = 180 + Math.random() * 80;
+                    const coolSat = 50 + Math.random() * 40;
+                    const coolLight = 35 + Math.random() * 30;
+                    baseColor = hslToRgb(coolHue, coolSat, coolLight);
+                    
+                    const coolShift = (colorDiff / 255) * 25;
+                    oddColor = hslToRgb(coolHue + coolShift, coolSat, coolLight);
+                    break;
+                    
+                case 7:
+                    const pastelHue = Math.random() * 360;
+                    const pastelSat = 30 + Math.random() * 30;
+                    const pastelLight = 60 + Math.random() * 20;
+                    baseColor = hslToRgb(pastelHue, pastelSat, pastelLight);
+                    
+                    const pastelDiff = (colorDiff / 255) * 15;
+                    oddColor = hslToRgb(pastelHue, pastelSat + pastelDiff, pastelLight - pastelDiff);
                     break;
             }
             
@@ -1155,6 +1205,7 @@
         function nextLevel() {
             gameState.level++;
             updateDisplay();
+            updateHintCost();
             generateLevel();
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('hintBtn').style.display = 'inline-block';
@@ -1164,18 +1215,29 @@
         function showHint() {
             if (!gameState.gameActive) return;
             
-            gameState.score = Math.max(0, gameState.score - 10);
+            const hintCost = gameState.level * 10;
+            gameState.score = Math.max(0, gameState.score - hintCost);
             updateDisplay();
             
-            const correctCell = document.querySelector(`[data-index="${gameState.oddCellIndex}"]`);
-            const originalTransform = correctCell.style.transform;
-            correctCell.style.transform = 'translateY(-15px) scale(1.15)';
-            correctCell.style.filter = 'brightness(1.3)';
+            const settings = difficulties[gameState.difficulty];
+            const gridSize = settings.gridSize;
+            const oddIndex = gameState.oddCellIndex;
+            const oddRow = Math.floor(oddIndex / gridSize);
+            const oddCol = oddIndex % gridSize;
             
-            setTimeout(() => {
-                correctCell.style.transform = originalTransform;
-                correctCell.style.filter = '';
-            }, 1000);
+            // Alle Zellen durchgehen
+            const allCells = document.querySelectorAll('.game-cell');
+            allCells.forEach((cell, index) => {
+                const cellRow = Math.floor(index / gridSize);
+                const cellCol = index % gridSize;
+                
+                // Wenn die Zelle NICHT in der richtigen Reihe UND NICHT in der richtigen Spalte ist
+                if (cellRow !== oddRow && cellCol !== oddCol) {
+                    setTimeout(() => {
+                        cell.classList.add('hint-fade');
+                    }, Math.random() * 200);
+                }
+            });
         }
 
         // Timer Functions
@@ -1222,8 +1284,18 @@
             });
         }
 
+        // Update Hint Cost Display
+        function updateHintCost() {
+            const hintCost = gameState.level * 10;
+            const hintCostElement = document.getElementById('hintCost');
+            if (hintCostElement) {
+                hintCostElement.textContent = hintCost;
+            }
+        }
+
         // Update Display
         function updateDisplay() {
+            updateHintCost();
             document.getElementById('levelDisplay').textContent = gameState.level;
             document.getElementById('scoreDisplay').textContent = gameState.score;
             document.getElementById('highscoreDisplay').textContent = gameState.highscore;
